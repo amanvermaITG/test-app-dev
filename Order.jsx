@@ -1,0 +1,788 @@
+import {
+  IndexTable,
+  LegacyCard,
+  IndexFilters,
+  useSetIndexFiltersMode,
+  Text,
+  Badge,
+  useBreakpoints,
+  Box,
+  Modal,
+  RadioButton,
+  Page,
+  BlockStack,
+  DatePicker,
+  InlineError,
+  Toast,
+  Select,
+  Frame,
+  InlineGrid,
+  InlineStack,
+  Spinner,
+  EmptyState,
+} from "@shopify/polaris";
+import { useState, useCallback, useMemo, useEffect } from "react";
+import { TitleBar } from "@shopify/app-bridge-react";
+function OrderManagement({ orders }) {
+  console.log(parseOrderDate("15 Jan at 12:00 PM"));
+  const [loading, setLoading] = useState(true);
+  const [buttonLoding, setButtonLoding] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 100;
+  const [itemStrings] = useState([
+    "All",
+    "Exported",
+    "Amazon",
+    "Online Store",
+    "To Export",
+  ]);
+  const [toastActive, setToastActive] = useState(false);
+  const [selected, setSelected] = useState(0);
+  const [toastMessage, setToastMessage] = useState("");
+  const [sortSelected, setSortSelected] = useState(["date desc"]);
+  const { mode, setMode } = useSetIndexFiltersMode();
+  const [selectedDates, setSelectedDates] = useState({
+    start: new Date(),
+    end: new Date(),
+  });
+  const [{ month, year }, setDate] = useState({
+    month: new Date().getMonth(),
+    year: new Date().getFullYear(),
+  });
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [queryValue, setQueryValue] = useState("");
+  const [selectedResources, setSelectedResources] = useState([]);
+  const [exportModalOpen, setExportModalOpen] = useState(false);
+  const [exportOption, setExportOption] = useState("");
+  const [timeError, setTimeError] = useState(false);
+  const [startHour, setStartHour] = useState("00");
+  const [startMinute, setStartMinute] = useState("00");
+  const [endHour, setEndHour] = useState("23");
+  const [endMinute, setEndMinute] = useState("59");
+  const onHandleCancel = () => { };
+  const toastMarkup = toastActive ? (
+    <Frame>
+      <Toast
+        content={toastMessage}
+        onDismiss={() => {
+          setToastActive(false);
+          setButtonLoding(false);
+        }}
+      />
+    </Frame>
+  ) : null;
+
+
+  const viewTabs = useMemo(
+    () =>
+      itemStrings.map((item, index) => ({
+        content: item,
+        index,
+        id: `${item}-${index}`,
+        isLocked: index === 0,
+      })),
+    [itemStrings],
+  );
+  useEffect(() => {
+    if (orders && orders.length > 0) {
+      setLoading(false);
+    } else {
+      setLoading(true);
+    }
+  }, [orders]);
+  const sortOptions = [
+    { label: "Order", value: "order asc", directionLabel: "Ascending" },
+    { label: "Order", value: "order desc", directionLabel: "Descending" },
+    { label: "Customer", value: "customer asc", directionLabel: "A-Z" },
+    { label: "Customer", value: "customer desc", directionLabel: "Z-A" },
+    { label: "Date", value: "date asc", directionLabel: "Oldest first" },
+    { label: "Date", value: "date desc", directionLabel: "Newest first" },
+    { label: "Total", value: "total asc", directionLabel: "Ascending" },
+    { label: "Total", value: "total desc", directionLabel: "Descending" },
+  ];
+
+  // Filtering
+  const filteredOrders = useMemo(() => {
+    let result = [...orders];
+
+    // Search filter
+    if (queryValue) {
+      const lowerQuery = queryValue.toLowerCase();
+      result = result.filter(
+        (o) =>
+          o.orderNumber.toLowerCase().includes(lowerQuery) ||
+          o.customer.toLowerCase().includes(lowerQuery),
+      );
+    }
+
+    if (selected === 1) {
+      result = result.filter((o) => o.tags?.includes("exported"));
+    } else if (selected === 2) {
+      result = result.filter((o) => o.channels?.includes("Amazon"));
+    } else if (selected === 3) {
+      result = result.filter((o) => o.channels?.includes("Online Store"));
+    } else if (selected === 4) {
+      result = result.filter(
+        (o) =>
+          !o.tags?.includes("exported") &&
+          o.paymentStatus?.includes("Paid") &&
+          o.fulfillmentStatus?.includes("Unfulfilled"),
+      );
+    }
+
+    return result;
+  }, [orders, queryValue, selected]);
+
+  const sortedOrders = useMemo(() => {
+    const [sortKey, sortDirection] = sortSelected[0].split(" ");
+    let result = [...filteredOrders];
+
+    result.sort((a, b) => {
+      let va, vb;
+      switch (sortKey) {
+        case "order":
+          vb = parseInt(b.id.replace("gid://shopify/Order/", ""), 10);
+          va = parseInt(a.id.replace("gid://shopify/Order/", ""), 10);
+          break;
+        case "customer":
+          va = a.customer.toLowerCase();
+          vb = b.customer.toLowerCase();
+          break;
+        case "date":
+          va = parseOrderDate(a.date).getTime();
+          vb = parseOrderDate(b.date).getTime();
+          break;
+        case "total":
+          va = parseFloat(a.total);
+          vb = parseFloat(b.total);
+          break;
+        default:
+          return 0;
+      }
+      if (va < vb) return sortDirection === "asc" ? -1 : 1;
+      if (va > vb) return sortDirection === "asc" ? 1 : -1;
+      return sortDirection === "asc" ? va - vb : vb - va;
+    });
+
+    return result;
+  }, [filteredOrders, sortSelected]);
+
+  const paginatedOrders = useMemo(() => {
+    return sortedOrders.slice(
+      (currentPage - 1) * pageSize,
+      currentPage * pageSize,
+    );
+  }, [sortedOrders, currentPage]);
+
+  const handleMonthChange = useCallback(
+    (month, year) => setDate({ month, year }),
+    [],
+  );
+  const handleSelectionChange = useCallback(
+    (selectionType, toggleType, selection) => {
+      if (selectionType === "single") {
+        setSelectedResources((prev) =>
+          toggleType
+            ? [...new Set([...prev, selection])]
+            : prev.filter((id) => id !== selection),
+        );
+      } else if (selectionType === "page") {
+        const pageIds = paginatedOrders.map((o) => o.id);
+        setSelectedResources((prev) =>
+          toggleType
+            ? [...new Set([...prev, ...pageIds])]
+            : prev.filter((id) => !pageIds.includes(id)),
+        );
+      } else if (selectionType === "multi" && selection) {
+        const { start, end } = selection;
+        const min = Math.min(start, end);
+        const max = Math.max(start, end);
+        const rangeIds = paginatedOrders.slice(min, max + 1).map((o) => o.id);
+        setSelectedResources((prev) =>
+          toggleType
+            ? [...new Set([...prev, ...rangeIds])]
+            : prev.filter((id) => !rangeIds.includes(id)),
+        );
+      }
+    },
+    [paginatedOrders],
+  );
+  const allResourcesSelected =
+    paginatedOrders.length > 0 &&
+    paginatedOrders.every((o) => selectedResources.includes(o.id));
+
+  // Export Handler
+
+  const handleExport = useCallback(
+    async (selectedOrders = filteredOrders) => {
+      console.log(filteredOrders,"filteredOrdersfilteredOrders")
+      setButtonLoding(true);
+      const now = new Date();
+      let startTime, endTime;
+      setTimeError(false);
+
+      console.log(exportOption, selectedDates, "DEBUG exportOption");
+
+      // ✅ DATE RANGE FIX
+      if (exportOption === "dateRange" && selectedDates?.start) {
+        startTime = new Date(selectedDates.start);
+        startTime.setHours(0, 0, 0, 0);
+
+        endTime = new Date(selectedDates.end || selectedDates.start);
+        endTime.setHours(23, 59, 59, 999);
+      } else if (exportOption === "timeRange") {
+        const startHh = parseInt(startHour);
+        const startMm = parseInt(startMinute);
+        const endHh = parseInt(endHour);
+        const endMm = parseInt(endMinute);
+        const startTotal = startHh * 60 + startMm;
+        const endTotal = endHh * 60 + endMm;
+        if (endTotal <= startTotal) {
+          setTimeError(true);
+          return;
+        }
+        startTime = new Date(selectedDate);
+        startTime.setHours(startHh, startMm, 0, 0);
+        endTime = new Date(selectedDate);
+        endTime.setHours(endHh, endMm, 0, 0);
+
+      }
+
+      // ✅ DEFAULT (ALL)
+      else {
+        startTime = new Date(0);
+        endTime = now;
+      }
+
+      console.log(startTime, "startTime");
+      console.log(endTime, "endTime");
+      const ordersToExport = selectedOrders.filter((order) => {
+        const orderDate = parseOrderDate(order.date);
+        if (!orderDate) return false;
+
+        return orderDate >= startTime && orderDate <= endTime;
+      });
+
+
+      console.log(ordersToExport, "ordersToExport");
+
+      if (ordersToExport.length === 0) {
+        setToastMessage("No orders match the selected filters and date range.");
+        setToastActive(true);
+        setExportModalOpen(false);
+        setButtonLoding(false);
+        return;
+      }
+
+      if (ordersToExport.length > 100) {
+        setToastMessage("You can export only 100 orders at a time");
+        setToastActive(true);
+        setExportModalOpen(false);
+        setButtonLoding(false);
+        return;
+      }
+
+
+      try {
+        const res = await fetch("/app/api/export", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            orders: ordersToExport,
+            filters: { exportOption, startTime, endTime },
+          }),
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          setSelectedResources([]);
+          const link = document.createElement("a");
+          link.href = data.filePath;
+          link.download = data.filename;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        } else {
+          setToastMessage("Failed to export orders.");
+          setToastActive(true);
+        }
+      } catch (err) {
+        console.error("Export error", err);
+        setToastMessage("Something went wrong while exporting orders. Please try again.");
+        setToastActive(true);
+      }
+
+
+      setButtonLoding(false);
+      setExportModalOpen(false);
+    },
+    [
+      exportOption,
+      selectedDate,
+      selectedDates,
+      startHour,
+      startMinute,
+      endHour,
+      endMinute,
+      filteredOrders,
+    ],
+  );
+
+  // Bulk Actions
+  const promotedBulkActions = [
+    {
+      title: "Export",
+      loading: buttonLoding,
+      actions: [
+        {
+          content: "Export as CSV",
+
+          onAction: () => {
+            const selectedOrders = filteredOrders.filter((order) =>
+              selectedResources.includes(order.id),
+            );
+            handleExport(selectedOrders);
+          },
+        },
+      ],
+    },
+  ];
+
+  // Time Options
+  const hourOptions = Array.from({ length: 24 }, (_, i) => ({
+    label: i.toString().padStart(2, "0"),
+    value: i.toString().padStart(2, "0"),
+  }));
+  const minuteOptions = Array.from({ length: 60 }, (_, i) => ({
+    label: i.toString().padStart(2, "0"),
+    value: i.toString().padStart(2, "0"),
+  }));
+
+  // Pagination Label
+  const startIdx =
+    filteredOrders.length === 0 ? 0 : (currentPage - 1) * pageSize + 1;
+  const endIdx = Math.min(currentPage * pageSize, filteredOrders.length);
+  const paginationLabel = `${startIdx} - ${endIdx} of ${filteredOrders.length}`;
+
+  // Table Rows
+  const breakpoints = useBreakpoints();
+  const condensed = breakpoints.smDown;
+  const rowMarkup = paginatedOrders.map(
+    (
+      {
+        id,
+        orderNumber,
+        date,
+        customer,
+        total,
+        paymentStatus,
+        paymentProgress,
+        fulfillmentStatus,
+        fulfillmentProgress,
+        deliveryMethod,
+        channels,
+        items,
+        refunds,
+        properties,
+        tag,
+      },
+      index,
+    ) =>
+      (!refunds || refunds.length === 0) && (
+        <IndexTable.Row
+          id={id}
+          key={id}
+          selected={selectedResources.includes(id)}
+          position={index}
+        >
+          {condensed ? (
+            <div
+              style={{ padding: "12px 16px", width: "100%" }}
+              className="tag-new"
+            >
+              <BlockStack gap="200">
+                <InlineStack gap="200" align="start">
+                  <Text variant="bodyMd" fontWeight="semibold" as="span">
+                    {orderNumber}
+                  </Text>
+                  <Text variant="bodySm" as="span" tone="subdued">
+                    {date}
+                  </Text>
+                </InlineStack>
+                <InlineStack align="space-between">
+                  <Text as="span" variant="bodyMd">
+                    {customer}
+                  </Text>
+                  <Text as="span" variant="bodyMd" alignment="end">
+                    {`$${total}`}
+                  </Text>
+                </InlineStack>
+                <InlineStack gap="200">
+                  {paymentStatus === "Paid" ? (
+                    <Badge progress={paymentProgress}>{paymentStatus}</Badge>
+                  ) : (
+                    <Badge tone="warning" progress={paymentProgress}>
+                      {paymentStatus}
+                    </Badge>
+                  )}
+                  {fulfillmentStatus === "Unfulfilled" ? (
+                    <Badge tone="attention" progress={fulfillmentProgress}>
+                      {fulfillmentStatus}
+                    </Badge>
+                  ) : (
+                    <Badge progress={fulfillmentProgress}>
+                      {fulfillmentStatus}
+                    </Badge>
+                  )}
+                </InlineStack>
+                <BlockStack gap="100">
+                  <Text as="span" variant="bodySm" tone="subdued">
+                    Delivery: {deliveryMethod}
+                  </Text>
+                  <Text as="span" variant="bodySm" tone="subdued">
+                    Channel: {channels || "N/A"}
+                  </Text>
+                  <Text as="span" variant="bodySm" tone="subdued">
+                    Items:{" "}
+                    {Array.isArray(items) ? items.join(", ") : items || "N/A"}
+                  </Text>
+                </BlockStack>
+              </BlockStack>
+            </div>
+          ) : (
+            <>
+              <IndexTable.Cell>
+                <Text
+                  variant="bodyMd"
+                  fontWeight="semibold"
+                  as="span"
+                >
+                  {orderNumber}
+                </Text>
+              </IndexTable.Cell>
+              <IndexTable.Cell>
+                <Text >
+                  {date}
+                </Text>
+              </IndexTable.Cell>
+              <IndexTable.Cell>
+                <Text>
+                  {customer}
+                </Text>
+              </IndexTable.Cell>
+              <IndexTable.Cell>
+                <Text
+                  as="span"
+                  numeric
+                >
+                  {`$${total}`}
+                </Text>
+              </IndexTable.Cell>
+              <IndexTable.Cell>
+                {paymentStatus === "Paid" ? (
+                  <Badge progress={paymentProgress}>{paymentStatus}</Badge>
+                ) : (
+                  <Badge tone="warning" progress={paymentProgress}>
+                    {paymentStatus}
+                  </Badge>
+                )}
+              </IndexTable.Cell>
+              <IndexTable.Cell>
+                {fulfillmentStatus === "Unfulfilled" ? (
+                  <Badge tone="attention" progress={fulfillmentProgress}>
+                    {fulfillmentStatus}
+                  </Badge>
+                ) : (
+                  <Badge progress={fulfillmentProgress}>
+                    {fulfillmentStatus}
+                  </Badge>
+                )}
+              </IndexTable.Cell>
+              <IndexTable.Cell>
+                <Text >
+                  {deliveryMethod}
+                </Text>
+              </IndexTable.Cell>
+              <IndexTable.Cell>
+                <Text>
+                  {channels || " "}
+                </Text>
+              </IndexTable.Cell>
+              <IndexTable.Cell>
+                {Array.isArray(items) ? items.join(", ") : items || " "}
+              </IndexTable.Cell>
+            </>
+          )}
+        </IndexTable.Row>
+      ),
+  );
+  return (
+    <>
+      <Page fullWidth>
+        <TitleBar title="Order Export">
+          <button onClick={() => setExportModalOpen(true)}>Export</button>
+        </TitleBar>
+        {buttonLoding && (
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              background: "rgba(255,255,255,0.7)",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              zIndex: 9999,
+            }}
+          >
+            <Spinner accessibilityLabel="Exporting orders..." size="large" />
+          </div>
+        )}
+        {!loading ? (
+          <LegacyCard>
+            <Box paddingBlockEnd="400">
+              <IndexFilters
+                sortOptions={sortOptions}
+                sortSelected={sortSelected}
+                queryValue={queryValue}
+                clearButton
+                queryPlaceholder="Searching in all"
+                onQueryChange={setQueryValue}
+                onQueryClear={() => setQueryValue("")}
+                onSort={setSortSelected}
+                tabs={viewTabs}
+                selected={selected}
+                onSelect={setSelected}
+                filters={[]}
+                cancelAction={{
+                  onAction: onHandleCancel,
+                  disabled: false,
+                  loading: false,
+                }}
+                appliedFilters={[]}
+                onClearAll={() => setQueryValue("")}
+                mode={mode}
+                setMode={setMode}
+              />
+              <IndexTable
+                condensed={condensed}
+                resourceName={{ singular: "order", plural: "orders" }}
+                itemCount={paginatedOrders.length}
+                selectedItemsCount={
+                  selectedResources.filter((id) =>
+                    paginatedOrders.some((o) => o.id === id),
+                  ).length
+                }
+                allResourcesSelected={allResourcesSelected}
+                onSelectionChange={handleSelectionChange}
+                promotedBulkActions={promotedBulkActions}
+                headings={[
+                  { title: "Order" },
+                  { title: "Date" },
+                  { title: "Customer" },
+                  { title: "Total" },
+                  { title: "Payment status" },
+                  { title: "Fulfillment status" },
+                  { title: "Delivery method" },
+                  { title: "Channel" },
+                  { title: "Items" },
+                ]}
+                loading={buttonLoding}
+                pagination={{
+                  hasPrevious: currentPage > 1,
+                  hasNext: currentPage * pageSize < filteredOrders.length,
+                  onPrevious: () =>
+                    setCurrentPage((prev) => Math.max(prev - 1, 1)),
+                  onNext: () => setCurrentPage((prev) => prev + 1),
+                  label: paginationLabel,
+                }}
+              >
+                {rowMarkup}
+              </IndexTable>
+            </Box>
+          </LegacyCard>
+        ) : (
+          <EmptyState align="center">
+            <Spinner accessibilityLabel="Spinner example" size="large" />{" "}
+          </EmptyState>
+        )}
+        {toastMarkup}
+      </Page>
+
+      {/* Export Modal */}
+      <Modal
+        open={exportModalOpen}
+        onClose={() => setExportModalOpen(false)}
+        title="Export Orders"
+        primaryAction={{
+          content: "Export",
+          onAction: () => handleExport(),
+          loading: buttonLoding,
+        }}
+        secondaryActions={[
+          {
+            content: "Cancel",
+            onAction: () => setExportModalOpen(false),
+          },
+        ]}
+      >
+        <Modal.Section>
+          <div style={{ paddingBlockEnd: "8px" }}>
+            <Text variant="headingSm" as="h6">
+              Export
+            </Text>
+          </div>
+
+          <BlockStack gap="200">
+            <RadioButton
+              label="Order Export By date range"
+              checked={exportOption === "dateRange"}
+              onChange={() => {
+                setExportOption("dateRange");
+                setSelectedDates({ start: new Date(), end: new Date() });
+              }}
+            />
+            {exportOption === "dateRange" && (
+              <DatePicker
+                month={month}
+                year={year}
+                onChange={setSelectedDates}
+                onMonthChange={handleMonthChange}
+                selected={selectedDates}
+                multiMonth
+                allowRange
+                disableDatesAfter={new Date()}
+              />
+            )}
+
+            <RadioButton
+              label="Order Export By Time range on a specific date"
+              checked={exportOption === "timeRange"}
+              onChange={() => {
+                setExportOption("timeRange");
+                setSelectedDate(new Date());
+              }}
+            />
+            {exportOption === "timeRange" && (
+              <BlockStack gap="400">
+                <DatePicker
+                  month={month}
+                  year={year}
+                  onChange={({ start }) => setSelectedDate(start)}
+                  onMonthChange={handleMonthChange}
+                  selected={selectedDate}
+                  allowRange={false}
+                  disableDatesAfter={new Date()}
+                />
+                <BlockStack gap="200">
+                  <Text variant="bodyMd" fontWeight="bold">
+                    Start time
+                  </Text>
+                  <InlineGrid columns={2} gap="400">
+                    <Select
+                      label="Hour"
+                      options={hourOptions}
+                      value={startHour}
+                      onChange={setStartHour}
+                    />
+                    <Select
+                      label="Minute"
+                      options={minuteOptions}
+                      value={startMinute}
+                      onChange={setStartMinute}
+                    />
+                  </InlineGrid>
+                </BlockStack>
+                <BlockStack gap="200">
+                  <Text variant="bodyMd" fontWeight="bold">
+                    End time
+                  </Text>
+                  <InlineGrid columns={2} gap="400">
+                    <Select
+                      label="Hour"
+                      options={hourOptions}
+                      value={endHour}
+                      onChange={setEndHour}
+                    />
+                    <Select
+                      label="Minute"
+                      options={minuteOptions}
+                      value={endMinute}
+                      onChange={setEndMinute}
+                    />
+                  </InlineGrid>
+                </BlockStack>
+                {timeError && (
+                  <InlineError
+                    message="End time must be after start time"
+                    fieldID="time-error"
+                  />
+                )}
+              </BlockStack>
+            )}
+          </BlockStack>
+        </Modal.Section>
+        {filteredOrders.length === 0 && (
+          <Modal.Section>
+            <InlineError
+              message="No orders match the selected filters."
+              fieldID="order-export-error"
+            />
+          </Modal.Section>
+        )}
+      </Modal>
+    </>
+  );
+
+  // Helpers
+
+  function parseOrderDate(dateStr) {
+    
+  const referenceDate = new Date();
+  try {
+    if (!dateStr) return null;
+    if (dateStr instanceof Date) return dateStr;
+
+    const str = String(dateStr).trim();
+    const year = referenceDate.getFullYear();
+
+    if (/at/i.test(str)) {
+      const cleaned = str.replace(/ at /i, ' ').replace(/ AT /i, ' ');
+      const parts = cleaned.split(/\s+/);
+      if (parts.length === 4) {
+        const [day, monthAbbr, time, ampm] = parts;
+        const monthMap = {
+          'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'Jun': 5,
+          'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9, 'Nov': 10, 'Dec': 11
+        };
+        const month = monthMap[monthAbbr];
+        if (month === undefined) return null;
+
+        const [hourStr, minStr] = time.split(':');
+        let hour = parseInt(hourStr, 10);
+        const minute = parseInt(minStr, 10);
+        if (isNaN(hour) || isNaN(minute)) return null;
+
+        if (ampm.toUpperCase() === 'PM' && hour < 12) hour += 12;
+        if (ampm.toUpperCase() === 'AM' && hour === 12) hour = 0;
+
+        const parsed = new Date(year, month, day, hour, minute, 0);
+        if (parsed > referenceDate) {
+          parsed.setFullYear(year - 1);
+        }
+        return parsed;
+      }
+    }
+    // ISO / other formats
+    const parsed = new Date(str);
+    return isNaN(parsed.getTime()) ? null : parsed;
+  } catch {
+    return null;
+  }
+}
+
+}
+
+export default OrderManagement;
