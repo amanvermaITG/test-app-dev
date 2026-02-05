@@ -1,0 +1,99 @@
+Task List -: 
+
+
+Mega Menu
+Announcment Bar Slider
+Slider With Image Or Video
+Add Video Section
+Featured Product
+Collection Grid
+Collection Based Product
+Testimonial Section With Slider
+Add Newsletter Popup
+Newsletter Section
+Add Image And Content
+Ajax Cart Update
+Ajax Cart Drawer
+Mini Cart
+Predictive Search
+Collection Page Ajax Cart Update
+Add A Quote Form In Product Page
+Product Page Thumbnail Vertical Slider
+Product Page Swatch Option
+Variant Change , Change Product Image
+Product Media [Image Or Video]
+Collection Page Pagination
+Collection Page Infinite Scroll
+Custom Popup
+Product Recommendation
+Releted Product
+Recently Viewed Product
+Gift Wrapping On Cart Page
+Show Payment Option On Cart Page
+Preloader
+Custom Line Item Property On Product Page
+Additional Message On Cart Page
+Delivery Date Picker On Cart Page
+Collection Filter
+Shipping Calculate On Cart Page
+Currency Picker
+Language Selector
+Wholesale Functionality
+Variant Change , Update Variant Price
+In Stock Or Out Of Stock On Product Page Or Collection Page
+Variant Option Show On Collection Page
+Fancy Box
+Product Image Zoom Effect
+Floor Calculator
+Quick View
+Klaviyo Or Mailchaimp Connection
+Show Product 2nd Image On Hover
+Product Subscription
+Slider With Video
+Reward Points
+Sticky Header
+Age Verification Popup
+Autoplay Video
+All Collection Wise Product Slider Show On One Page
+Show Catogries And Sub-Catogries
+Lazyload
+Product Page Thumbnail
+Accordion
+Tab
+Break Product Description
+Product Personalization
+Preorder
+Product Share Add-On
+Product Share On Email
+Shipping Management
+Discount
+Country Wise Text Show
+Speed Optiomization
+Review
+Back Order Notification
+Wishlist
+Add Badge On Collection Page Product Like New , Sold Out , Preorder Etc.
+Product Tag Condition
+Location Wise Inventory Shown On Product Page
+Multiple Block Setting
+Sold-Out Variant Show Cross Image Or Disabled
+Cart Page T&C Checkbox Compulsory
+Search Bar Popup
+Show Tax On Product
+Shop Pay / Quad Pay / After Pay Etc Payment Show On Product Page
+Wholesale Registration Form
+Required Field On Product Page
+Use Of Shopify Updated Metafield Functionality
+Add Custom Font On Website
+Different Image Show On Mobile And Desktop
+Add Social Media
+Ip Based Redirection
+Add Instagram
+Masonry Grid
+Collection Page List And Grid View
+Collection And Cart Page Add Discount In Percent
+Show Products On Blog Page
+Related Product Show By Tag On Product Page
+Discount Code On Cart Page
+Additional Field Add On Cart Page
+Notification Template

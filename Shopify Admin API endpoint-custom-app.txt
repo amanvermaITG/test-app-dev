@@ -1,0 +1,137 @@
+All major Shopify Admin API endpoints you can use to manage a store programmatically. These are typically accessed via REST.
+
+https://{API_KEY}:{API_PASSWORD}@{STORE_NAME}.myshopify.com/admin/api/2025-04/{resource}.json
+
+
+**Products**
+
+GET /admin/api/2025-04/products.json – List products
+
+GET /admin/api/2025-04/products/{product_id}.json – Get single product
+
+POST /admin/api/2025-04/products.json – Create product
+
+PUT /admin/api/2025-04/products/{product_id}.json – Update product
+
+DELETE /admin/api/2025-04/products/{product_id}.json – Delete product
+
+
+
+
+** Inventory**
+
+GET /admin/api/2025-04/inventory_levels.json
+
+POST /admin/api/2025-04/inventory_levels/set.json
+
+POST /admin/api/2025-04/inventory_levels/adjust.json
+
+
+
+**Orders**
+
+GET /admin/api/2025-04/orders.json – List orders
+
+GET /admin/api/2025-04/orders/{order_id}.json – Get specific order
+
+POST /admin/api/2025-04/orders.json – Create order
+
+PUT /admin/api/2025-04/orders/{order_id}.json – Update order
+
+DELETE /admin/api/2025-04/orders/{order_id}.json – Cancel order
+
+
+
+**Customers**
+
+GET /admin/api/2025-04/customers.json – List customers
+
+GET /admin/api/2025-04/customers/{customer_id}.json
+
+POST /admin/api/2025-04/customers.json – Create
+
+PUT /admin/api/2025-04/customers/{customer_id}.json – Update
+
+DELETE /admin/api/2025-04/customers/{customer_id}.json – Delete
+
+
+
+**Draft Orders**
+
+GET /admin/api/2025-04/draft_orders.json
+
+POST /admin/api/2025-04/draft_orders.json
+
+PUT /admin/api/2025-04/draft_orders/{id}.json
+
+DELETE /admin/api/2025-04/draft_orders/{id}.json
+
+
+
+
+**Discounts (Price Rules)**
+
+GET /admin/api/2025-04/price_rules.json
+
+POST /admin/api/2025-04/price_rules.json
+
+GET /admin/api/2025-04/discount_codes.json
+
+
+
+**Transactions & Payments**
+
+GET /admin/api/2025-04/orders/{order_id}/transactions.json
+
+POST /admin/api/2025-04/orders/{order_id}/transactions.json
+
+
+
+
+**Metafields**
+
+GET /admin/api/2025-04/metafields.json – All metafields
+
+GET /admin/api/2025-04/products/{product_id}/metafields.json
+
+POST /admin/api/2025-04/products/{product_id}/metafields.json
+
+
+
+**Collections**
+
+GET /admin/api/2025-04/custom_collections.json
+
+GET /admin/api/2025-04/smart_collections.json
+
+
+
+**Media (Images)**
+
+GET /admin/api/2025-04/products/{product_id}/images.json
+
+POST /admin/api/2025-04/products/{product_id}/images.json
+
+
+
+**Shop Info**
+
+GET /admin/api/2025-04/shop.json – Basic shop info
+
+
+
+**Webhook Management**
+
+GET /admin/api/2025-04/webhooks.json
+
+POST /admin/api/2025-04/webhooks.json
+
+DELETE /admin/api/2025-04/webhooks/{id}.json
+
+
+
+**Fulfillment**
+
+GET /admin/api/2025-04/orders/{order_id}/fulfillments.json
+
+POST /admin/api/2025-04/orders/{order_id}/fulfillments.json
