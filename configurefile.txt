@@ -1,0 +1,90 @@
+ ├── .vscode
+    ├── app
+    │   ├── api
+    │   │   ├── controllers
+    │   │   │   └── orderController.js
+    │   │   ├── order
+    │   │   │   ├── orderExportApi.js
+    │   │   │   └── orderlistApi.js
+    │   │   ├── components
+    │   │   │   ├── Order.jsx
+    │   │   │   └── OrderHistory.jsx
+    │   │   ├── model
+    │   │   │   ├── exportHistory.js
+    │   │   │   └── order.js
+    │   │   ├── routes
+    │   │   │   ├── _index
+    │   │   │   └── auth.login
+    │   │   │       ├── error.server.jsx
+    │   │   │       └── route.jsx
+    │   │   ├── services
+    │   │   │   └── APIServices.js
+    │   │   ├── app_index.jsx
+    │   │   ├── app.additional.jsx
+    │   │   ├── app.apiexport.js
+    │   │   ├── app.jsx
+    │   │   ├── app.order.jsx
+    │   │   ├── app.orderHistory.jsx
+    │   │   ├── auth.$.jsx
+    │   │   ├── webhooks.app.scopes_update.jsx
+    │   │   ├── webhooks.app.uninstalled.jsx
+    │   │   ├── webhooks.jsx
+    │   │   ├── db.server.js
+    │   │   ├── entry.server.jsx
+    │   │   ├── root.jsx
+    │   │   ├── routes.js
+    │   │   └── shopify.server.js
+    │   ├── extensions
+    │   │   └── .gitkeep
+    │   ├── prisma
+    │   └── public
+    │       ├── exports
+    │       └── favicon.ico
+    └── .dockerignore
+
+
+#json
+    "scripts": {
+    "build": "remix vite:build",
+    "dev": "shopify app dev",
+    "config:link": "shopify app config link",
+    "generate": "shopify app generate",
+    "deploy": "shopify app deploy",
+    "config:use": "shopify app config use",
+    "env": "shopify app env",
+    "start": "remix-serve ./build/server/index.js",
+    "docker-start": "npm run setup && npm run start",
+    "setup": "prisma generate && prisma migrate deploy",
+    "lint": "eslint --cache --cache-location ./node_modules/.cache/eslint .",
+    "shopify": "shopify",
+    "prisma": "prisma",
+    "graphql-codegen": "graphql-codegen",
+    "vite": "vite"
+  },
+  "type": "module",
+  "engines": {
+    "node": "^18.20 || ^20.10 || >=21.0.0"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.2.1",
+    "@remix-run/dev": "^2.16.1",
+    "@remix-run/fs-routes": "^2.16.1",
+    "@remix-run/node": "^2.16.1",
+    "@remix-run/react": "^2.16.1",
+    "@remix-run/serve": "^2.16.1",
+    "@shopify/app-bridge-react": "^4.2.3",
+    "@shopify/polaris": "^12.0.0",
+    "@shopify/shopify-app-remix": "^3.7.0",
+    "@shopify/shopify-app-session-storage-mongodb": "^4.0.20",
+    "@shopify/shopify-app-session-storage-prisma": "^6.0.0",
+    "form-data": "^4.0.5",
+    "isbot": "^5.1.0",
+    "mongodb": "^5.9.2",
+    "mongoose": "^7.8.7",
+    "prisma": "^6.2.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "remix-flat-routes": "^0.8.5",
+    "shopify": "^3.84.1",
+    "vite-tsconfig-paths": "^5.0.1"
+  },
