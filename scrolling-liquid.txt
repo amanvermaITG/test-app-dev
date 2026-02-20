@@ -1,0 +1,327 @@
+{%- liquid
+  assign social_icons = true
+  if settings.social_facebook_link == blank and settings.social_instagram_link == blank and settings.social_youtube_link == blank and settings.social_tiktok_link == blank and settings.social_twitter_link == blank and settings.social_pinterest_link == blank and settings.social_snapchat_link == blank and settings.social_tumblr_link == blank and settings.social_vimeo_link == blank
+    assign social_icons = false
+  endif
+-%}
+{{ 'scrolling-text.css' | asset_url | stylesheet_tag }}
+<style>
+   .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+
+  .marquee-scrolling-text{
+    mask-image: linear-gradient(to right, rgba(0, 0, 0, 0) 0%, rgb(0, 0, 0) 7.5%, rgb(0, 0, 0) 92.5%, rgba(0, 0, 0, 0) 100%);
+  }
+  .marquee-scrolling-text-inner{
+    padding:15px 0;
+  }
+</style>
+
+<div class="marquee-scrolling__option page-width {% unless section.settings.expanded_width %}page-width {% endunless %} color-{{ section.settings.color_scheme }} section-{{ section.id }}-padding  gradient" data-scrolling="true">
+  <div class="marquee-scrolling-text marquee3k" data-speed="{{ section.settings.scrolling_speed }}" data-pausable="t">
+    <div class="marquee-scrolling-text-inner color-{{ section.settings.color_scheme }}">
+      {%- for block in section.blocks -%}
+        {%- case block.type -%}
+          {%- when 'scrolling_text' -%}
+            <div class="marquee-scrolling-item" role="region" {{ block.shopify_attributes }}>
+              {%- if block.settings.text != blank -%}
+                {%- if block.settings.link != blank -%}
+                  <a href="{{ block.settings.link }}" class="marquee-scrolling-text-link link">
+                {%- endif -%}
+                <span class="marquee-scrolling-content {{ section.settings.text_size }} mg-none{% if block.settings.text_stroke == false %} text-stroke{% endif %}">
+                  {{ block.settings.text | escape }}
+                </span>
+                {%- if block.settings.link != blank -%}
+                  </a>
+                {%- endif -%}
+              {%- endif -%}
+            </div>
+          {%- when 'social-media' -%}
+            {% if social_icons %}
+              <div class="marquee-scrolling-item" role="region" {{ block.shopify_attributes }}>
+                <ul class="list-unstyled social-links-scrolling list-social" role="list">
+                  {%- if settings.social_facebook_link != blank -%}
+                    <li class="list-social__item">
+                      <a
+                        href="{{ settings.social_facebook_link }}"
+                        target="_blank"
+                        class="list-social__link {{ section.settings.text_size }}"
+                      >
+                        {{ 'general.social.links.facebook' | t }}
+                      </a>
+                    </li>
+                  {%- endif -%}
+                  {%- if settings.social_instagram_link != blank -%}
+                    <li class="list-social__item">
+                      <a
+                        href="{{ settings.social_instagram_link }}"
+                        target="_blank"
+                        class="list-social__link {{ section.settings.text_size }}"
+                      >
+                        {{ 'general.social.links.instagram' | t }}
+                      </a>
+                    </li>
+                  {%- endif -%}
+                  {%- if settings.social_youtube_link != blank -%}
+                    <li class="list-social__item">
+                      <a
+                        href="{{ settings.social_youtube_link }}"
+                        target="_blank"
+                        class="list-social__link {{ section.settings.text_size }}"
+                      >
+                        {{ 'general.social.links.youtube' | t }}
+                      </a>
+                    </li>
+                  {%- endif -%}
+                  {%- if settings.social_tiktok_link != blank -%}
+                    <li class="list-social__item">
+                      <a
+                        href="{{ settings.social_tiktok_link }}"
+                        target="_blank"
+                        class="list-social__link {{ section.settings.text_size }}"
+                      >
+                        {{ 'general.social.links.tiktok' | t }}
+                      </a>
+                    </li>
+                  {%- endif -%}
+                  {%- if settings.social_twitter_link != blank -%}
+                    <li class="list-social__item">
+                      <a
+                        href="{{ settings.social_twitter_link }}"
+                        target="_blank"
+                        class="list-social__link {{ section.settings.text_size }}"
+                      >
+                        {{ 'general.social.links.twitter' | t }}
+                      </a>
+                    </li>
+                  {%- endif -%}
+                  {%- if settings.social_snapchat_link != blank -%}
+                    <li class="list-social__item">
+                      <a
+                        href="{{ settings.social_snapchat_link }}"
+                        target="_blank"
+                        class="list-social__link {{ section.settings.text_size }}"
+                      >
+                        {{ 'general.social.links.snapchat' | t }}
+                      </a>
+                    </li>
+                  {%- endif -%}
+                  {%- if settings.social_pinterest_link != blank -%}
+                    <li class="list-social__item">
+                      <a
+                        href="{{ settings.social_pinterest_link }}"
+                        target="_blank"
+                        class="list-social__link {{ section.settings.text_size }}"
+                      >
+                        {{ 'general.social.links.pinterest' | t }}
+                      </a>
+                    </li>
+                  {%- endif -%}
+                  {%- if settings.social_tumblr_link != blank -%}
+                    <li class="list-social__item">
+                      <a
+                        href="{{ settings.social_tumblr_link }}"
+                        target="_blank"
+                        class="list-social__link {{ section.settings.text_size }}"
+                      >
+                        {{ 'general.social.links.tumblr' | t }}
+                      </a>
+                    </li>
+                  {%- endif -%}
+                  {%- if settings.social_vimeo_link != blank -%}
+                    <li class="list-social__item">
+                      <a
+                        href="{{ settings.social_vimeo_link }}"
+                        target="_blank"
+                        class="list-social__link {{ section.settings.text_size }}"
+                      >
+                        {{ 'general.social.links.vimeo' | t }}
+                      </a>
+                    </li>
+                  {%- endif -%}
+                </ul>
+              </div>
+            {% endif %}
+        {%- endcase -%}
+      {%- endfor -%}
+    </div>
+  </div>
+</div>
+
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.50 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.50 | round: 0 }}px;
+  }
+  @media screen and (min-width: 990px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+{%- endstyle -%}
+{% if section.settings.enable_sticky %}
+  <script>
+    const elements = document.querySelectorAll('.shopify-section-group-footer-group.section-scrolling-text');
+    if (elements.length > 0) {
+      elements[0].classList.add('bottom-sticky');
+    }
+  </script>
+{% endif %}
+{% schema %}
+{
+  "name": "Scrolling Text",
+  "class": "gradient section-scrolling-text",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Header"
+    },
+    {
+      "type": "checkbox",
+      "id": "expanded_width",
+      "label": "Expand width",
+      "default": true
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:sections.all.colors.label",
+      "default": "scheme-2"
+    },
+    {
+      "type": "select",
+      "id": "text_size",
+      "options": [
+        {
+          "value": "p",
+          "label": "Extra Small"
+        },
+        {
+          "value": "h3",
+          "label": "Small"
+        },
+        {
+          "value": "h2",
+          "label": "Large"
+        },
+        {
+          "value": "h1",
+          "label": "Extra Large"
+        },
+        {
+          "value": "h0",
+          "label": "Extra extra Large"
+        }
+      ],
+      "default": "h0",
+      "label": "Extra extra Large"
+    },
+    {
+      "type": "select",
+      "id": "scrolling_speed",
+      "options": [
+        {
+          "value": "0.50",
+          "label": "Slow"
+        },
+        {
+          "value": "0.75",
+          "label": "Medium"
+        },
+        {
+          "value": "1",
+          "label": "Fast"
+        }
+      ],
+      "default": "0.75",
+      "label": "Medium"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_sticky",
+      "default": false,
+      "label": "Enable bottom sticky",
+      "info": "Enable bottom sticky"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "scrolling_text",
+      "name": "Scrolling Text",
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "default": "Top & tees up to 40% off",
+          "label": "Text"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link"
+        },
+        {
+          "type": "checkbox",
+          "id": "text_stroke",
+          "default": true,
+          "label": "Fill text stroke"
+        }
+      ]
+    },
+    {
+      "type": "social-media",
+      "limit": 1,
+      "name": "Social Media",
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Scrolling Social Links"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Scrolling Text",
+      "blocks": [
+        {
+          "type": "scrolling_text",
+          "settings": {
+            "text_stroke": false
+          }
+        },
+        {
+          "type": "scrolling_text",
+          "settings": {
+            "text_stroke": true
+          }
+        },
+        {
+          "type": "scrolling_text",
+          "settings": {
+            "text_stroke": false
+          }
+        },
+        {
+          "type": "scrolling_text",
+          "settings": {
+            "text_stroke": true
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
+
+
